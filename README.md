@@ -1,0 +1,1 @@
+# quickinfo-google-extension
