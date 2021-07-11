@@ -1,7 +1,6 @@
 // @Description: Checking that html has full loaded
 // @Params:
-// Returns: Void
-
+// @Returns: Void
 document.addEventListener(
   'DOMContentLoaded',
   () => {
@@ -12,46 +11,45 @@ document.addEventListener(
 
 // @Description: Starting point of the application
 // @Params:
-// Returns: Void
+// @Returns: Void
 const main = async () => {
   event.preventDefault()
+
   let urlValue = document.getElementById('urlText').value
+
   if (checkIsUrlVaild(urlValue)) {
-    const htmlResponse = await fetchHtmlFromUrl(urlValue);
-    stripContentFromUrl(htmlResponse);
-    // Script Url
+    const htmlResponse = await fetchHtmlFromUrl(urlValue)
+    let product = stripContentFromUrl(htmlResponse)
+    //appendProductDataToScreen(product)
   } else {
-    console.log("ERR: Invaild Url")
+    console.log('ERR: Invaild Url')
     // Pop Up error message
   }
 }
 
 // @Description: Url Vaildation to assure it's supported.
 // @Params: Product Url from Input
-// Returns: Boolean
+// @Returns: Boolean
 const checkIsUrlVaild = (URL) => {
-
   if (URL === null || URL === '') {
     return false
   }
 
   let parser = document.createElement('a')
   parser.href = URL
+
   if (
     parser.protocol === 'https:' &&
     parser.hostname === 'weidian.com' &&
     parser.pathname === '/item.html'
   ) {
     return true
-    //console.log(parser.protocol, parser.hostname, parser.pathname, parser.search);
   } else {
-    //console.log("NOT WEIDIAN")
-    //console.log(typeof parser.protocol, parser.hostname, parser.pathname, parser.search);
     return false
   }
 }
 
-// Returns: object(html document)
+// @Returns: object(html document)
 const fetchHtmlFromUrl = async (strUrlValue) => {
   let options = {
     method: 'GET',
@@ -68,23 +66,45 @@ const fetchHtmlFromUrl = async (strUrlValue) => {
   return response
 }
 
-// @Description: Script to remove nessary infomation from html into object 
+// @Description: Script to remove nessary infomation from html into object
 // @Params: DOMHTML -> Object
-// Returns: Object
+// @Returns: Object
 const stripContentFromUrl = (htmlContent) => {
   const product = {
-    title: "", // String
-    price: 0.00, // Double 
-    seller : "", // String
-    postage: "",  //  String
-    shippingLocation: "" // String
+    title: '', // String
+    price: 0.0, // Double
+    seller: '', // String
+    postage: '', //  String
+    stock: 0, // String,
+    sizes: [] // ARRAY OF AVAIBLE SIZES 
   }
-  console.log(htmlContent);
-  product.price = htmlContent.querySelector("#__rocker-render-inject__").dataset;
-  product.title = htmlContent.querySelector(".item-name");
-  product.postage = htmlContent.querySelector(".postage-block");
-  product.shippingLocation = htmlContent.querySelector(".delivery-address-location");
-  product.seller = htmlContent.querySelector(".shop-name-str");
+  try {
+    let jsonData = JSON.parse(
+      htmlContent.querySelector('#__rocker-render-inject__').dataset.obj,
+    )
+    product.price = jsonData.result.default_model.item_info.origin_price;
+    product.title = jsonData.result.default_model.item_info.item_name
+    
+    if(jsonData.result.default_model.delivery_info.expressFeeDesc == undefined ||  jsonData.result.default_model.delivery_info.expressFeeDesc  === null){
+      product.postage = 0;
+    } else {
+      product.postage = jsonData.result.default_model.delivery_info.expressFeeDesc;
+    }
 
-  console.log(product);
+    product.seller = jsonData.result.default_model.shop_info.shopName;
+    product.stock = jsonData.result.default_model.item_info.stock;
+
+    return product;
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+
+
+// @Description: Append Products infomation to screen
+// @Params: Product -> Object
+// @Returns: VOID
+const appendProductDataToScreen = (product) => {
+
 }
