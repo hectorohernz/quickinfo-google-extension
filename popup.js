@@ -20,7 +20,7 @@ const main = async () => {
   if (checkIsUrlVaild(urlValue)) {
     const htmlResponse = await fetchHtmlFromUrl(urlValue)
     let product = stripContentFromUrl(htmlResponse)
-    //appendProductDataToScreen(product)
+    appendProductDataToScreen(product)
   } else {
     console.log('ERR: Invaild Url')
     // Pop Up error message
@@ -106,5 +106,13 @@ const stripContentFromUrl = (htmlContent) => {
 // @Params: Product -> Object
 // @Returns: VOID
 const appendProductDataToScreen = (product) => {
+  const listOfIds = ["price", "title","seller" ,"postage", "stock"];
+  listOfIds.forEach(member => {
+      let currentMember = document.getElementById("pv--"+ member);
+      currentMember.innerText = product[member];
+      console.log(currentMember)
+  })
+  let contentContainer = document.getElementById("product-content");
+  contentContainer.classList.remove("hidden")
 
 }
